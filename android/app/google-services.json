@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "471027721988",
+    "project_id": "socialauthappleaid",
+    "storage_bucket": "socialauthappleaid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471027721988:android:8ef51e3e0f1f0576e89251",
+        "android_client_info": {
+          "package_name": "com.appleaid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "471027721988-4osd79ptgdh0i91087e8bo8pgb4rdps2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.appleaid",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "471027721988-vsqtfcd0l3hbe0183e3cna0knirk3g5d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwUQrYL1YgyRsABC7HVaRsX-Fd2wvW4Qw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "471027721988-vsqtfcd0l3hbe0183e3cna0knirk3g5d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

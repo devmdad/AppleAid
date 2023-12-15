@@ -3,11 +3,17 @@ import {GoogleSignin, GoogleSigninButton , statusCodes } from '@react-native-goo
 import {StyleSheet, TouchableOpacity, View, Text} from 'react-native';
 import auth from '@react-native-firebase/auth';
 
-const Login = () => {
+const Login = ({onManualLogin, onUpdateManualLogin}) => {
 
     // useEffect(() => {
     //     GoogleSignin.configure();
     // }, []);
+
+    const handleManualEmailNavigate = () => {
+        onUpdateManualLogin(!onManualLogin);
+        console.log(onManualLogin);
+    }
+
 
     useEffect(() => {
         GoogleSignin.configure({
@@ -70,6 +76,10 @@ const Login = () => {
 
       <TouchableOpacity style={styles.btnStyle} onPress={signOut}>
         <Text>Signout</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.btnStyle} onPress={handleManualEmailNavigate}>
+        <Text>Manual Login</Text>
       </TouchableOpacity>
     </View>
   );

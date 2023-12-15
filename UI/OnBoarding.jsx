@@ -2,6 +2,7 @@ import React from 'react'
 import AppIntroSlider from 'react-native-app-intro-slider';
 import { View, Image, Text } from 'react-native';
 import { SIZES, COLORS } from '../constants/theme';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 const OnBoarding = ({homepage, onUpdateShowHomepage}) => {
 
@@ -59,6 +60,7 @@ const OnBoarding = ({homepage, onUpdateShowHomepage}) => {
                 alignItems: 'center',
                 padding: 15,
                 paddingTop: 100,
+                backgroundColor: 'white',
               }}>
               <Image
                 source={item.image}

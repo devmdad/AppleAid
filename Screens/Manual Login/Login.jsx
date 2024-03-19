@@ -17,11 +17,15 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import ImageUploadScreen from '../Main Screens/ImageUploadScreen';
+import {useDispatch} from 'react-redux';
+import {loginSuccess} from '../authSlice';
 
 const Login = ({navigation}) => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = useState(null);
+
+  const dispatch = useDispatch(); // Example of using Redux dispatch
 
   const handleLogin = async () => {
     try {
@@ -31,7 +35,8 @@ const Login = ({navigation}) => {
       );
       setError(null);
       console.log('User logged in:', userCredential.user);
-      navigation.navigate('ImageUpload');
+      dispatch(loginSuccess());
+      navigation.navigate('Home');
     } catch (error) {
       console.error('Login failed:', error.message);
       setError('Invalid email or password. Please try again.');
@@ -64,7 +69,8 @@ const Login = ({navigation}) => {
         accessToken,
       );
       await auth().signInWithCredential(credential);
-      navigation.navigate('ImageUpload');
+      dispatch(loginSuccess());
+      navigation.navigate('Home');
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log(error);
@@ -94,69 +100,71 @@ const Login = ({navigation}) => {
   return (
     <View style={styles.container}>
       <View style={styles.subcontainer}>
-      <Image
-        source={require('../../assets/app_icon.png')}
-        style={{
-          width: 200,
-          height: 200,
-          resizeMode: 'contain',
-          margin: 10,
-        }}
-      />
-      <Text
-        style={{
-          fontSize: 24,
-          color: 'black',
-          fontWeight: '800',
-          marginBottom: 20,
-        }}>
-        LOGIN
-      </Text>
-
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={text => setEmail(text)}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        placeholderTextColor='grey'
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={text => setPassword(text)}
-        placeholderTextColor='grey'
-      />
-      <TouchableOpacity
-        onPress={handleLogin}
-        style={{
-          backgroundColor: COLORS.primary,
-          borderRadius: 4,
-        }}>
+        <Image
+          source={require('../../assets/app_icon.png')}
+          style={{
+            width: 200,
+            height: 200,
+            resizeMode: 'contain',
+            margin: 10,
+          }}
+        />
         <Text
           style={{
-            paddingHorizontal: 30,
-            paddingVertical: 12,
-            color: 'white',
-            fontWeight: '500',
-            fontSize: 16,
+            fontSize: 24,
+            color: 'black',
+            fontWeight: '800',
+            marginBottom: 20,
           }}>
           LOGIN
         </Text>
-      </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-        <Text style={styles.forgotPassword}>Forgot Password?</Text>
-      </TouchableOpacity>
+        {error && <Text style={styles.errorText}>{error}</Text>}
 
-      <TouchableOpacity onPress={() => navigation.navigate('Registeration')}>
-        <Text style={styles.registerLink}>Don't have an account? Register</Text>
-      </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={text => setEmail(text)}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          placeholderTextColor="grey"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={text => setPassword(text)}
+          placeholderTextColor="grey"
+        />
+        <TouchableOpacity
+          onPress={handleLogin}
+          style={{
+            backgroundColor: COLORS.primary,
+            borderRadius: 4,
+          }}>
+          <Text
+            style={{
+              paddingHorizontal: 30,
+              paddingVertical: 12,
+              color: 'white',
+              fontWeight: '500',
+              fontSize: 16,
+            }}>
+            LOGIN
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+          <Text style={styles.forgotPassword}>Forgot Password?</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Registeration')}>
+          <Text style={styles.registerLink}>
+            Don't have an account? Register
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.googleContainer}>
@@ -182,7 +190,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     width: '100%',
-    height: SIZES.height
+    height: SIZES.height,
   },
 
   subcontainer: {
@@ -192,7 +200,7 @@ const styles = StyleSheet.create({
   },
 
   googleContainer: {
-    marginTop: 50
+    marginTop: 50,
   },
 
   title: {

@@ -9,6 +9,11 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
+import java.util.ArrayList;
+
+// import com.reactlibrary.TfliteReactNativePackage;
+import io.invertase.firebase.storage.ReactNativeFirebaseStoragePackage;
+
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -23,8 +28,24 @@ public class MainApplication extends Application implements ReactApplication {
         protected List<ReactPackage> getPackages() {
           @SuppressWarnings("UnnecessaryLocalVariable")
           List<ReactPackage> packages = new PackageList(this).getPackages();
+
+          // new TfliteReactNativePackage();
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
+
+          // Remove any existing entry of ReactNativeFirebaseStoragePackage
+    // Remove any existing entry of ReactNativeFirebaseStoragePackage
+    for (int i = 0; i < packages.size(); i++) {
+        ReactPackage reactPackage = packages.get(i);
+        if (reactPackage instanceof ReactNativeFirebaseStoragePackage) {
+            packages.remove(i);
+            break; // Exit the loop after removing the first instance
+        }
+    }
+
+
+          packages.add(new ReactNativeFirebaseStoragePackage()); // Add this line
+
           return packages;
         }
 

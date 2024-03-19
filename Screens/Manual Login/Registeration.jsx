@@ -12,11 +12,12 @@ import {
   GoogleSignin,
   GoogleSigninButton,
   statusCodes,
-} from '@react-native-google-signin/google-signin';
+} from '@react-native-google-signin/google-signin'
 import auth from '@react-native-firebase/auth';
 import {COLORS} from '../../constants/theme';
 
-const Registration = () => {
+
+const Registration = ({navigation}) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,6 +30,7 @@ const Registration = () => {
         password,
       );
       console.log('User registered:', userCredential.user);
+      navigation.navigate('ImageUpload');
     } catch (error) {
       console.error('Registration failed:', error.message);
       setError(
@@ -61,6 +63,7 @@ const Registration = () => {
         accessToken,
       );
       await auth().signInWithCredential(credential);
+      navigation.navigate('ImageUpload');
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log(error);
@@ -106,7 +109,7 @@ const Registration = () => {
         placeholder="Name"
         value={name}
         onChangeText={text => setName(text)}
-        placeholderTextColor='grey'
+        placeholderTextColor="grey"
       />
       <TextInput
         style={styles.input}
@@ -115,7 +118,7 @@ const Registration = () => {
         onChangeText={text => setEmail(text)}
         keyboardType="email-address"
         autoCapitalize="none"
-        placeholderTextColor='grey'
+        placeholderTextColor="grey"
       />
       <TextInput
         style={styles.input}
@@ -123,7 +126,7 @@ const Registration = () => {
         secureTextEntry
         value={password}
         onChangeText={text => setPassword(text)}
-        placeholderTextColor='grey'
+        placeholderTextColor="grey"
       />
 
       <TouchableOpacity

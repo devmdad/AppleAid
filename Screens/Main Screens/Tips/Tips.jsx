@@ -6,8 +6,8 @@ import MaskedView from '@react-native-community/masked-view';
 import {COLORS} from '../../../constants/theme';
 
 const Tips = () => {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  // const colorScheme = useColorScheme();
+  // const isDarkMode = colorScheme === 'dark';
 
   const [tipIndex, setTipIndex] = useState(0);
   const [tips, setTips] = useState([
@@ -113,32 +113,22 @@ const Tips = () => {
     '🌿 Enjoy the process of growing plants and appreciate the beauty of nature in your garden.',
   ]);
 
-  const GradientText = ({text, colors, style}) => {
-    return (
-      <MaskedView
-        style={[styles.containerHeading, style]}
-        maskElement={<Text style={[styles.text, style]}>{text}</Text>}>
-        <LinearGradient colors={colors} style={styles.gradient} />
-        <Text style={[styles.text, style]}>{text}</Text>
-      </MaskedView>
-    );
-  };
-
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * tips.length);
     setTipIndex(randomIndex);
   }, []);
 
   return (
-    <View style={[styles.container, isDarkMode && styles.containerDark]}>
-      <GradientText
+    <View style={[styles.container]}>
+      {/* <GradientText
         text="Tips for You"
-        colors={['green', 'white']}
+        colors={['green', 'black']}
         style={styles.text}
-      />
-      <View style={[styles.tipBox, isDarkMode && styles.tipBoxDark]}>
+      /> */}
+      <Text style={styles.text}>Tips for You</Text>
+      <View style={[styles.tipBox]}>
         <Icon name="lightbulb-on-outline" size={60} color="#FFA000" />
-        <Text style={[styles.tipText, isDarkMode && styles.tipTextDark]}>
+        <Text style={[styles.tipText]}>
           {tips[tipIndex]}
         </Text>
       </View>
@@ -151,18 +141,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.bg,
     rowGap: 30,
   },
   containerDark: {
     backgroundColor: '#121212',
   },
   tipBox: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#fff',
     padding: 40,
     margin: 18,
     borderRadius: 10,
     alignItems: 'center',
+    borderColor: COLORS.primary,
+    borderWidth: 4
   },
   tipBoxDark: {
     backgroundColor: '#333333',
@@ -171,7 +163,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginLeft: 10,
     marginTop: 10,
-    color: '#000000',
+    color: '#000',
     lineHeight: 30,
     textAlign: 'center',
     fontFamily: 'poppins',
@@ -195,6 +187,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: '800',
     fontFamily: "poppins",
+    color: COLORS.primary
   },
 });
 

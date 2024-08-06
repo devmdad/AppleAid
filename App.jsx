@@ -44,15 +44,9 @@ function App() {
   const [showHomePage, setShowHomePage] = useState(false);
   const Stack = createStackNavigator();
 
-  // const [manualLogin, setManualLogin] = useState(false);
-
   const updateShowHomepage = newState => {
     setShowHomePage(newState);
   };
-
-  // const updateManualLogin = (newState: boolean) => {
-  //   setManualLogin(newState);
-  // };
 
   StatusBar.setBarStyle('light-content', true);
   StatusBar.setBackgroundColor(COLORS.primary);
@@ -76,43 +70,6 @@ function App() {
   const Tab = createBottomTabNavigator();
 
   return (
-    //     <View style={{flex: 1}}>
-    //       {/* // <NavigationContainer>
-    //     //   <Stack.Navigator initialRouteName={currentUser ? 'Home' : 'Login'}>
-    //     //     <Stack.Screen name="Home" component={HomeScreen} />
-    //     //     <Stack.Screen name="Login" component={Login} />
-    //     //     <Stack.Screen name="Registeration" component={Registeration} />
-    //     //     <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-    //     //     {<Stack.Screen name="Home" component={HomeScreen} />
-    //     //     {<Stack.Screen name="Community" component={CommunityScreen} />}
-    //     //   </Stack.Navigator>
-    //     // </NavigationContainer> */}
-
-    //       {/* <NavigationContainer>
-
-    //      <Stack.Navigator>
-    //             <Stack.Screen name="Home" component={HomeScreen} />
-    //             <Stack.Screen name="Login" component={Login} />
-    //             <Stack.Screen name="Registeration" component={Registeration} />
-    //             <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-    //             <Stack.Screen name="Community" component={CommunityScreen} />
-    //           </Stack.Navigator>
-    // </NavigationContainer> */}
-
-    //       <NavigationContainer independent={true}>
-    //         <Stack.Navigator>
-    //           <Stack.Screen name="Login" component={Login} />
-    //           <Stack.Screen name="Home" component={HomeScreen} />
-    //         </Stack.Navigator>
-    //       </NavigationContainer>
-
-    //       {currentUser ? (
-    //           <BottomNav />
-    //       ) : (
-    //         <Login />
-    //       )}
-    //     </View>
-
     <Provider store={store}>
       <Navigation />
     </Provider>

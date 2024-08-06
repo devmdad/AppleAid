@@ -1,6 +1,10 @@
 // Navigation.js
 import React, {useEffect, useState} from 'react';
-import {DarkTheme, DefaultTheme, NavigationContainer} from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useSelector} from 'react-redux'; // If you're using Redux for state management
@@ -38,13 +42,14 @@ const screenOptions = {
 };
 
 const AuthStack = () => (
-  <Stack.Navigator>
+  <Stack.Navigator screenOptions={{headerShown: false}}>
     <Stack.Screen name="Login" component={Login} />
     {/* Add more screens for registration, forgot password, etc. */}
     <Stack.Screen name="Home" component={HomeScreen} />
     <Stack.Screen name="Registeration" component={Registration} />
     <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
     <Stack.Screen name="Community" component={CommunityScreen} />
+    <Stack.Screen name="Disease-Detection" component={ImageUploadScreen} />
   </Stack.Navigator>
 );
 
@@ -162,8 +167,8 @@ const MainTabs = () => (
 );
 
 const Navigation = () => {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  // const colorScheme = useColorScheme();
+  // const isDarkMode = colorScheme === 'dark';
   const isLoggedIn = useSelector(state => state.auth.isLoggedIn); // Example of getting login state from Redux
 
   const [initializing, setInitializing] = useState(true);
@@ -185,7 +190,7 @@ const Navigation = () => {
   }
 
   return (
-    <NavigationContainer theme={isDarkMode ? DarkTheme : DefaultTheme}>
+    <NavigationContainer theme={DefaultTheme}>
       {user ? <MainTabs /> : <AuthStack />}
     </NavigationContainer>
   );

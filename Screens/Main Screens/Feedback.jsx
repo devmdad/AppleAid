@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, TextInput, Button, StyleSheet} from 'react-native';
 import {firebase} from '@react-native-firebase/firestore';
+import {COLORS} from '../../constants/theme';
 
 const Feedback = () => {
   const [feedback, setFeedback] = useState('');
@@ -59,6 +60,7 @@ const Feedback = () => {
         multiline
         numberOfLines={4}
         placeholder="Enter your feedback..."
+        placeholderTextColor={COLORS.gray}
         value={feedback}
         onChangeText={handleFeedbackChange}
       />
@@ -69,7 +71,7 @@ const Feedback = () => {
         <Text style={styles.subtitle}>Your Feedback History</Text>
         {userFeedback.map(item => (
           <View key={item.id} style={styles.feedbackItem}>
-            <Text>{item.feedback}</Text>
+            <Text style={styles.fhtext}>{item.feedback}</Text>
             {/* Add Edit/Delete buttons here */}
           </View>
         ))}
@@ -82,17 +84,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: 'white',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: 'black',
   },
   subtitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
+    color: 'black',
   },
   input: {
     borderWidth: 1,
@@ -100,6 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
+    color: 'black',
   },
   feedbackHistory: {
     marginTop: 20,
@@ -110,6 +116,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
+  },
+  fhtext: {
+    color: 'black',
   },
 });
 

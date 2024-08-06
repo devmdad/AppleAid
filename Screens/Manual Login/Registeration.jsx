@@ -12,10 +12,9 @@ import {
   GoogleSignin,
   GoogleSigninButton,
   statusCodes,
-} from '@react-native-google-signin/google-signin'
+} from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
 import {COLORS} from '../../constants/theme';
-
 
 const Registration = ({navigation}) => {
   const [name, setName] = useState('');
@@ -25,16 +24,31 @@ const Registration = ({navigation}) => {
 
   const handleRegistration = async () => {
     try {
-      const userCredential = await auth().createUserWithEmailAndPassword(
-        email,
-        password,
-      );
-      console.log('User registered:', userCredential.user);
-      navigation.navigate('ImageUpload');
+      // Create user with email and password
+      if (name && email && password) {
+        const userCredential = await auth().createUserWithEmailAndPassword(
+          email,
+          password,
+        );
+
+        // Update user's display name
+        console.log(name);
+        await auth().currentUser.updateProfile({
+          displayName: name, // Set the display name
+        });
+      }
+
+      if (!name) {
+        setError('Please enter name');
+        throw new Error('Please enter name');
+      } else {
+        // console.log('User registered:', userCredential.user);
+        navigation.navigate('Disease-Detection');
+      }
     } catch (error) {
       console.error('Registration failed:', error.message);
       setError(
-        'Registration failed. Please check your information and try again.',
+        'Registration failed. Please fill all fields and make sure password is 8 characters long.',
       );
     }
   };
@@ -102,7 +116,7 @@ const Registration = ({navigation}) => {
         REGISTER
       </Text>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={styles.errorText}>{error}</Text>}
 
       <TextInput
         style={styles.input}
@@ -170,6 +184,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    padding: 10
   },
 
   googleContainer: {
@@ -220,6 +235,8 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 14,
     marginTop: 10,
+    textAlign: 'center',
+    marginBottom: 12
   },
 });
 

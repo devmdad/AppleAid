@@ -29,19 +29,24 @@ const Login = ({navigation}) => {
 
   const handleLogin = async () => {
     try {
-      const userCredential = await auth().signInWithEmailAndPassword(
-        email,
-        password,
-      );
-      setError(null);
-      console.log('User logged in:', userCredential.user);
-      dispatch(loginSuccess());
-      navigation.navigate('Home');
+      if (email && password) {
+        const userCredential = await auth().signInWithEmailAndPassword(
+          email,
+          password,
+        );
+
+        console.log('User logged in:', userCredential.user);
+        dispatch(loginSuccess());
+        navigation.navigate('Home');
+      } else {
+        throw new Error(error);
+      }
+      // setError(null);
     } catch (error) {
       console.error('Login failed:', error.message);
-      setError('Invalid email or password. Please try again.');
-      setEmail('');
-      setPassword('');
+      setError('Invalid or empty email or password!');
+      // setEmail('');
+      // setPassword('');
     }
   };
 

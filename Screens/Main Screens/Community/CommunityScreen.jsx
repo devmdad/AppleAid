@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Image,
   Modal,
   Share,
+  Alert,
   useColorScheme,
 } from 'react-native';
 import {firebase} from '@react-native-firebase/auth';
@@ -38,12 +39,58 @@ const CommunityScreen = () => {
   const [fullPostModalVisible, setFullPostModalVisible] = useState(false); // State for full post modal
   const [fullPost, setFullPost] = useState(null); // State for full post content
 
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchInput, setShowSearchInput] = useState(false);
+
+  const [isCommentDeleted, setIsCommentDeleted] = useState(false);
+
+  // const [postLiked, setPostLiked] = useState(false);
+  // const [comments, setComments] = useState([]);
 
   const handleToggleCommentBox = postId => {
     setPostIdForComment(postId); // Set the post ID for comment
     setShowCommentBox(prev => !prev);
+  };
+
+  const handleToggleSearchInput = () => {
+    setShowSearchInput(prevState => !prevState);
+  };
+
+  const handleSearch = () => {
+    // Implement search logic here
+    // Filter posts based on the searchQuery
+    if (searchQuery === '') {
+      setPosts(posts);
+      return;
+    }
+
+    const filteredPosts = posts.filter(post =>
+      post.question.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+    setPosts(filteredPosts);
+  };
+
+  const deletePost = async postId => {
+    try {
+      // Display confirmation popup
+      Alert.alert('Delete Post', 'Are you sure you want to delete this post?', [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: async () => {
+            await firestore().collection('posts').doc(postId).delete();
+            console.log('Post deleted successfully');
+          },
+          style: 'destructive',
+        },
+      ]);
+    } catch (error) {
+      console.error('Error deleting post: ', error);
+    }
   };
 
   // Function to upload image to Firebase Storage
@@ -67,6 +114,7 @@ const CommunityScreen = () => {
   };
 
   useEffect(() => {
+    // setIsCommentDeleted(false);
     const unsubscribe = firestore()
       .collection('posts')
       .orderBy('createdAt', 'desc')
@@ -108,14 +156,10 @@ const CommunityScreen = () => {
       });
 
     return () => unsubscribe();
-  }, [newComment]);
+  }, [newComment, showSearchInput && searchQuery === '']);
 
   const handleShowPostBox = () => {
     setShowPostBox(!showPostBox);
-  };
-
-  const formatDate = date => {
-    return moment(date).fromNow(); // Format date as '3 hours ago', 'Yesterday', etc.
   };
 
   const toggleCommentsVisibility = () => {
@@ -123,23 +167,6 @@ const CommunityScreen = () => {
   };
   const toggleSinglePostCommentsVisibility = () => {
     setShowAllComments(!showAllComments);
-  };
-
-  const renderComments = comments => {
-    if (showAllComments) {
-      return (
-        <View>
-          {comments.map((comment, index) => (
-            <Text key={index} style={styles.comment}>
-              {comment}
-            </Text>
-          ))}
-        </View>
-      );
-    } else {
-      // Show only one comment initially
-      return <Text style={styles.comment}>{comments[0]}</Text>;
-    }
   };
 
   const selectImage = () => {
@@ -227,20 +254,20 @@ const CommunityScreen = () => {
         console.error('Error: Current user not found');
         return;
       }
-
+  
       // Get the post document from Firestore
       const postRef = firestore().collection('posts').doc(postId);
       const postDoc = await postRef.get();
-
+  
       if (!postDoc.exists) {
         console.error('Error: Post does not exist');
         return;
       }
-
+  
       // Check if the user has already liked the post
       const likes = postDoc.data().likes || [];
       const hasLiked = likes.includes(currentUser.uid);
-
+  
       // Toggle like status
       let updatedLikes;
       if (hasLiked) {
@@ -248,10 +275,11 @@ const CommunityScreen = () => {
       } else {
         updatedLikes = [...likes, currentUser.uid];
       }
-
+  
       // Update the post document in Firestore with the updated likes array
       await postRef.update({likes: updatedLikes});
-
+  
+      await updateFullPostData(postId);
       console.log('Post like toggled successfully');
     } catch (error) {
       console.error('Error toggling like: ', error);
@@ -272,6 +300,7 @@ const CommunityScreen = () => {
       }
 
       // Add the comment to Firestore
+      // const commentId = uuidv4();
       await firestore()
         .collection('posts')
         .doc(postId)
@@ -281,12 +310,14 @@ const CommunityScreen = () => {
           userName: currentUser.displayName || 'Anonymous',
           comment: newComment,
           createdAt: new Date().toISOString(),
+          // commentId: commentId,
         });
 
       console.log('Comment added successfully');
       setNewComment('');
       // Hide comment box
       setShowCommentBox(false);
+      await updateFullPostData(postId);
     } catch (error) {
       console.error('Error adding comment: ', error);
     }
@@ -299,6 +330,86 @@ const CommunityScreen = () => {
   const handleCloseCommentModal = () => {
     setIsCommentModalVisible(false);
   };
+
+  // Function to fetch the latest post data from Firestore
+  const fetchPostData = async postId => {
+    try {
+      const postRef = firestore().collection('posts').doc(postId);
+      const postDoc = await postRef.get();
+
+      if (postDoc.exists) {
+        const postData = {...postDoc.data(), id: postDoc.id};
+
+        // Fetch comments associated with the post
+        const commentsSnapshot = await firestore()
+          .collection('posts')
+          .doc(postId)
+          .collection('comments')
+          .orderBy('createdAt', 'desc') // Order comments by createdAt descending
+          .get();
+
+        const comments = commentsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Add comments to postData
+        postData.comments = comments;
+
+        return postData;
+      } else {
+        console.error('Post does not exist');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching post data: ', error);
+      return null;
+    }
+  };
+
+  // Function to update the full post data and re-render the modal
+  const updateFullPostData = useCallback(async postId => {
+    try {
+      const postData = await fetchPostData(postId);
+      if (postData) {
+        setFullPost(postData);
+      }
+    } catch (error) {
+      console.error('Error updating full post data: ', error);
+    }
+  }, []);
+
+  // const deleteComment = async (postId, commentId) => {
+  //   try {
+  //     // Display confirmation popup
+  //     Alert.alert(
+  //       'Delete Comment',
+  //       'Are you sure you want to delete this comment?',
+  //       [
+  //         {
+  //           text: 'Cancel',
+  //           onPress: () => console.log('Cancel Pressed'),
+  //           style: 'cancel',
+  //         },
+  //         {
+  //           text: 'Delete',
+  //           onPress: async () => {
+  //             await firestore()
+  //               .collection('posts')
+  //               .doc(postId)
+  //               .collection('comments') // Target the comments subcollection
+  //               .doc(commentId) // Target the specific comment document
+  //               .delete();
+  //             console.log('Comment deleted successfully');
+  //           },
+  //           style: 'destructive',
+  //         },
+  //       ],
+  //     );
+  //   } catch (error) {
+  //     console.error('Error deleting comment: ', error);
+  //   }
+  // };
 
   const handleSubmitComment = async comment => {
     if (!postId || !comment) {
@@ -314,6 +425,7 @@ const CommunityScreen = () => {
       }
 
       // Add the comment to Firestore
+      const commentId = uuidv4();
       await firestore()
         .collection('posts')
         .doc(commentModalPostId)
@@ -323,6 +435,7 @@ const CommunityScreen = () => {
           userName: currentUser.displayName || 'Anonymous',
           comment: comment,
           createdAt: new Date().toISOString(),
+          commentId: commentId,
         });
 
       console.log('Comment added successfully');
@@ -361,9 +474,15 @@ const CommunityScreen = () => {
     });
   };
 
-  const openFullPostModal = post => {
-    setFullPost(post);
-    setFullPostModalVisible(true);
+  const openFullPostModal = async post => {
+    try {
+      await updateFullPostData(post.id);
+      setPostIdForComment(post.id); // Set post ID for comment
+      setShowCommentBox(false); // Hide comment box initially
+      setFullPostModalVisible(true);
+    } catch (error) {
+      console.error('Error opening full post modal: ', error);
+    }
   };
 
   const closeFullPostModal = () => {
@@ -384,22 +503,42 @@ const CommunityScreen = () => {
                 color={showPostBox ? COLORS.gray : COLORS.primary}
               />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleToggleSearchInput}>
               <Icon name="search1" size={24} color={COLORS.gray} />
             </TouchableOpacity>
           </View>
+          {/* Render search input field */}
+          {showSearchInput && (
+            <TextInput
+              style={{
+                flex: 1,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 8,
+                paddingHorizontal: 10,
+                marginLeft: 10,
+              }}
+              placeholder="Search..."
+              placeholderTextColor={COLORS.gray}
+              value={searchQuery}
+              onChangeText={text => setSearchQuery(text)}
+              onChange={handleSearch}
+            />
+          )}
         </View>
         {showPostBox && (
           <View>
             <TextInput
               style={styles.input}
               placeholder="Ask a question..."
+              placeholderTextColor={COLORS.gray}
               value={newPost.question}
               onChangeText={text => setNewPost({...newPost, question: text})}
             />
             <TextInput
               style={[styles.input, {height: 150}]}
               placeholder="Write your description..."
+              placeholderTextColor={COLORS.gray}
               multiline
               value={newPost.description}
               onChangeText={text => setNewPost({...newPost, description: text})}
@@ -439,7 +578,7 @@ const CommunityScreen = () => {
                 style={styles.actionButton}
                 onPress={() => handleLike(post.id)}>
                 <Icon
-                  name="hearto"
+                  name="heart"
                   size={20}
                   color={
                     post.likes.includes(firebase.auth().currentUser?.uid)
@@ -447,7 +586,9 @@ const CommunityScreen = () => {
                       : COLORS.gray
                   }
                 />
-                <Text style={{marginLeft: 6}}>{post.likes.length}</Text>
+                <Text style={{marginLeft: 6, color: 'gray'}}>
+                  {post.likes.length}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionButton}
@@ -458,13 +599,23 @@ const CommunityScreen = () => {
                 style={styles.actionButton}
                 onPress={() => handleToggleCommentBox(post.id)}>
                 <Icon name="message1" size={20} color={COLORS.gray} />
-                <Text style={{marginLeft: 6}}>{post.comments.length}</Text>
+                <Text style={{marginLeft: 6, color: 'gray'}}>
+                  {post.comments.length}
+                </Text>
               </TouchableOpacity>
             </View>
+            {firebase.auth().currentUser.uid === post.userId && (
+              <TouchableOpacity
+                onPress={() => deletePost(post.id)}
+                style={{marginTop: 16}}>
+                <Icon name="delete" size={24} color="red" />
+              </TouchableOpacity>
+            )}
             {/* Comment box */}
             {showCommentBox && postIdForComment === post.id && (
               <View style={styles.commentBox}>
                 <TextInput
+                  placeholderTextColor="gray"
                   placeholder="Add a comment..."
                   value={newComment}
                   onChangeText={setNewComment}
@@ -492,7 +643,7 @@ const CommunityScreen = () => {
           {fullPost && (
             <View
               style={{
-                backgroundColor: isDarkMode ? 'black' : 'white',
+                backgroundColor: 'white',
                 borderRadius: 10,
                 padding: 20,
                 width: '90%',
@@ -516,7 +667,7 @@ const CommunityScreen = () => {
                   style={modalStyles.actionButton}
                   onPress={() => handleLike(fullPost.id)}>
                   <Icon
-                    name="hearto"
+                    name="heart"
                     size={20}
                     color={
                       fullPost.likes.includes(firebase.auth().currentUser?.uid)
@@ -524,6 +675,9 @@ const CommunityScreen = () => {
                         : COLORS.gray
                     }
                   />
+                  <Text style={{marginLeft: 6, color: 'gray'}}>
+                    {fullPost.likes.length}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={modalStyles.actionButton}
@@ -536,12 +690,16 @@ const CommunityScreen = () => {
                   style={modalStyles.actionButton}
                   onPress={() => handleToggleCommentBox(fullPost.id)}>
                   <Icon name="message1" size={20} color={COLORS.gray} />
+                  <Text style={{marginLeft: 6, color: 'gray'}}>
+                    {fullPost.comments.length}
+                  </Text>
                 </TouchableOpacity>
               </View>
               {/* Comment box */}
               {showCommentBox && postIdForComment === fullPost.id && (
                 <View style={modalStyles.commentBox}>
                   <TextInput
+                    placeholderTextColor="gray"
                     placeholder="Add a comment..."
                     value={newComment}
                     onChangeText={setNewComment}
@@ -558,8 +716,8 @@ const CommunityScreen = () => {
               {/* Comments */}
               <View style={modalStyles.commentsContainer}>
                 <ScrollView>
-                  {fullPost.comments.map(comment => (
-                    <CommentItem key={comment.id} comment={comment} />
+                  {fullPost.comments.map((comment, index) => (
+                    <CommentItem key={index} comment={comment} />
                   ))}
                 </ScrollView>
               </View>
@@ -575,6 +733,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: COLORS.bg,
   },
   input: {
     borderWidth: 1,
@@ -582,6 +741,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     padding: 10,
+    color: 'black',
   },
   imageContainer: {
     marginBottom: 10,
@@ -592,7 +752,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   uploadButton: {
-    backgroundColor: 'blue',
+    backgroundColor: 'black',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
@@ -613,7 +773,7 @@ const styles = StyleSheet.create({
   },
   postContainer: {
     marginBottom: 20,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
@@ -621,9 +781,11 @@ const styles = StyleSheet.create({
   userName: {
     fontWeight: 'bold',
     marginBottom: 5,
+    color: 'black',
   },
   postText: {
     marginBottom: 5,
+    color: 'black',
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -669,7 +831,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginRight: 10,
+    color: 'black',
   },
+
   commentButton: {
     backgroundColor: COLORS.primary,
     padding: 10,
@@ -722,9 +886,11 @@ const modalStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: 'black',
   },
   description: {
     marginBottom: 10,
+    color: 'black',
   },
   imageContainer: {
     marginBottom: 10,
@@ -755,6 +921,7 @@ const modalStyles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginRight: 10,
+    color: 'black',
   },
   commentButton: {
     backgroundColor: COLORS.primary,

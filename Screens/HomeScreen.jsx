@@ -14,20 +14,21 @@ import {useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import LinearGradient from 'react-native-linear-gradient';
 import Tips from './Main Screens/Tips/Tips';
+import {COLORS} from '../constants/theme';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [username, setUsername] = useState(''); // State to hold username
 
-  const scheme = useColorScheme();
+  // const scheme = useColorScheme();
 
   const [isMenuVisible, setIsMenuVisible] = useState(false); // State to control menu visibility
 
   useEffect(() => {
-    // Fetch username from Firebase or your authentication provider
+    // Fetch username from Firebase or authentication provider
     const currentUser = auth().currentUser;
     currentUser && setUsername(`Hello ${currentUser.displayName}`); // Placeholder for demonstration
-  }, [username]);
+  }, [, username]);
 
   const navigateToProfile = () => {
     navigation.navigate('Profile');
@@ -59,65 +60,81 @@ const HomeScreen = () => {
   };
 
   // Define gradient colors for light and dark modes
-  const gradientColors =
-    scheme === 'dark' ? ['#1E824C', '#228B22'] : ['#9ACD32', '#32CD32'];
+  const gradientColors = ['#9ACD32', '#32CD32'];
 
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: COLORS.bg,
+        paddingVertical: 20,
+        paddingHorizontal: 20,
+      }}>
       <StatusBar barStyle="light-content" />
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.username}>{username}</Text>
+          <Text style={styles.username}>{username ? username : 'Hello'}</Text>
         </View>
         <View style={styles.headerRight}>
           <TouchableOpacity
-            style={styles.iconButton}
+            style={[styles.iconButton]}
             onPress={navigateToProfile}>
-            <Icon name="user-circle" size={24} color="#FFFFFF" />
+            <Icon name="user-circle" size={30} color="gray" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={toggleMenu}>
-            <Icon name="bars" size={24} color="#FFFFFF" />
+            <Icon name="bars" size={30} color="gray" />
           </TouchableOpacity>
         </View>
       </View>
-      <Text style={styles.heading}>Explore</Text>
-      <TouchableOpacity
-        style={[styles.block, styles.lowerBlock]}
-        onPress={navigateToDiseaseDetection}>
-        <LinearGradient
-          colors={gradientColors}
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 0}}
-          style={[StyleSheet.absoluteFill, styles.gradient]}
-        />
-        <IconFa5 name="shield-virus" size={50} color="#FFFFFF" />
-        <Text style={styles.blockText}>Disease Detection</Text>
-      </TouchableOpacity>
-      <View style={styles.sideBySide}>
-        <TouchableOpacity
-          style={[styles.block, styles.halfBlock]}
-          onPress={navigateToCommunity}>
-          <LinearGradient
-            colors={gradientColors}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 0}}
-            style={[StyleSheet.absoluteFill, styles.gradient]}
-          />
-          <Icon name="users" size={50} color="#FFFFFF" />
-          <Text style={styles.blockText}>Community</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.block, styles.halfBlock]}
-          onPress={navigateToTips}>
-          <LinearGradient
-            colors={gradientColors}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 0}}
-            style={[StyleSheet.absoluteFill, styles.gradient]}
-          />
-          <Icon name="lightbulb-o" size={50} color="#FFFFFF" />
-          <Text style={styles.blockText}>Tips</Text>
-        </TouchableOpacity>
+
+      <View style={{flex: 1, justifyContent: 'center', gap: 50}}>
+        <View>
+          <Text style={styles.heading}>Explore Apple Aid</Text>
+        </View>
+        <View>
+          <TouchableOpacity
+            style={[styles.block, styles.lowerBlock]}
+            onPress={navigateToDiseaseDetection}>
+            <LinearGradient
+              colors={gradientColors}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}
+              style={[StyleSheet.absoluteFill, styles.gradient]}
+            />
+            <IconFa5 name="shield-virus" size={50} color="#FFFFFF" />
+            <Text style={styles.blockText}>Disease Detection</Text>
+          </TouchableOpacity>
+          <View style={styles.sideBySide}>
+            <TouchableOpacity
+              style={[styles.block, styles.halfBlock]}
+              onPress={navigateToCommunity}>
+              {/* <LinearGradient
+                colors={gradientColors}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={[StyleSheet.absoluteFill, styles.gradient]}
+              /> */}
+              <Icon name="users" size={50} color={COLORS.primary} />
+              <Text style={[styles.blockText, {color: COLORS.primary}]}>
+                Community
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.block, styles.halfBlock]}
+              onPress={navigateToTips}>
+              {/* <LinearGradient
+                colors={gradientColors}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={[StyleSheet.absoluteFill, styles.gradient]}
+              /> */}
+              <Icon name="lightbulb-o" size={50} color={COLORS.primary} />
+              <Text style={[styles.blockText, {color: COLORS.primary}]}>
+                Tips
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
       <Modal
         visible={isMenuVisible}
@@ -126,13 +143,18 @@ const HomeScreen = () => {
         onRequestClose={toggleMenu}>
         <View style={styles.menuContainer}>
           <TouchableOpacity
+            onPress={toggleMenu}
+            style={{position: 'absolute', top: 20, right: 20}}>
+            <Icon name="window-close" size={30} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.menuItem}
             onPress={() => navigateToScreen('Home')}>
             <Text style={styles.menuText}>Home</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigateToScreen('DiseaseDetection')}>
+            onPress={() => navigateToScreen('Disease-Detection')}>
             <Text style={styles.menuText}>Disease Detection</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -157,12 +179,6 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1E1E1E',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -176,7 +192,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#444',
   },
   headerRight: {
     flexDirection: 'row',
@@ -185,24 +201,26 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   heading: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#164a04',
     marginBottom: 20,
+    textAlign: 'center',
+    fontFamily: 'poppins',
   },
   block: {
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.27,
-    shadowRadius: 4.65,
-    elevation: 6,
+    // shadowColor: '#000',
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 3,
+    // },
+    // shadowOpacity: 0.27,
+    // shadowRadius: 4.65,
+    // elevation: 6,
   },
   lowerBlock: {
     height: 150,
@@ -210,6 +228,8 @@ const styles = StyleSheet.create({
   halfBlock: {
     flex: 1,
     aspectRatio: 1, // Square shape
+    borderWidth: 4,
+    borderColor: COLORS.primary,
   },
   blockText: {
     fontSize: 20,
@@ -226,16 +246,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'black',
+    padding: 16,
   },
   menuItem: {
     paddingVertical: 20,
     width: '100%',
     alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    margin: 8,
   },
   menuText: {
     fontSize: 20,
-    color: '#FFFFFF',
+    color: 'green',
+    fontWeight: '600',
   },
   gradient: {
     borderRadius: 10,

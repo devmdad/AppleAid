@@ -23,7 +23,7 @@ const FeedbackModal = ({visible, onClose}) => {
           backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
         }}>
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Icon name="closecircle" size={24} />
+          <Icon name="closecircle" size={24} color="gray" />
         </TouchableOpacity>
         <Feedback />
       </View>

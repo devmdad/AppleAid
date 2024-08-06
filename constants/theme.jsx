@@ -4,12 +4,12 @@ const { width, height } = Dimensions.get('screen');
 
 export const COLORS = {
     primary: '#38A700',
-    bg: '#ddf3ac',
+    bg: '#ecffe6',
     title: '#072F4A',
     white: '#FFFFFF',
     lightGrey: '#D3D6D6',
     grey: '#C1C0C9',
-    gray: '#C1C0C9',
+    gray: '#707070',
     blue: '#087BB6',
     yellow: '#F4D03F',
 };
